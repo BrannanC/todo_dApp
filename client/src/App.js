@@ -42,6 +42,7 @@ class App extends Component {
   getTodos = async () => {
     // Get the value from the contract to prove it worked.
     const listIDs = await this.state.contract.methods.getListIDs().call();
+    console.log("ids", listIDs);
     const promises = listIDs.map(
       async x => await this.state.contract.methods.tasks(x).call()
     );
@@ -58,6 +59,20 @@ class App extends Component {
       .send({ from: this.state.accounts[0] }, () => this.getTodos());
   };
 
+  toggleComplete = async (e, id) => {
+    e.preventDefault();
+    await this.state.contract.methods
+      .toggleCompleted(id)
+      .send({ from: this.state.accounts[0] }, () => this.getTodos());
+  };
+
+  deleteTodo = async (e, id) => {
+    e.preventDefault();
+    await this.state.contract.methods
+      .deleteTodo(id)
+      .send({ from: this.state.accounts[0] }, () => this.getTodos());
+  };
+
   render() {
     if (!this.state.web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
@@ -67,7 +82,17 @@ class App extends Component {
         <button onClick={this.createTodo}>Create Todo</button>
         <h1>ToDapp List!</h1>
         {this.state.tasks.map(task => (
-          <p key={task[0]}>{task[1]} {task[3] ? 'completed' : 'incomplete'}</p>
+          <div key={task[0]}>
+            <p>
+              {task[1]} {`${task[2]}`}
+            </p>
+            <button onClick={e => this.toggleComplete(e, task[0])}>
+              Complete
+            </button>
+            <button onClick={e => this.deleteTodo(e, task[0])}>
+              Delete
+            </button>
+          </div>
         ))}
       </div>
     );

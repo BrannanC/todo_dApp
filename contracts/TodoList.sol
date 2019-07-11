@@ -28,17 +28,26 @@ contract TodoList {
       uint[] memory taskIDs = new uint[](taskCount);
       uint numberTasks = 0;
 
-      for(uint i = 1; i <= taskCount; i++){
+      for(uint i = 0; i < taskCount; i++){
         if(tasks[i].deleted == false){
           taskIDs[numberTasks] = tasks[i].id;
           numberTasks++;
         }
       }
-      return taskIDs;
+
+      uint[] memory resultIDs = new uint[](numberTasks);
+      for(uint j = 0; j < numberTasks; j++){
+        resultIDs[j] = taskIDs[j];
+      }
+      return resultIDs;
     }
 
     function toggleCompleted(uint _id) public {
       tasks[_id].completed = !tasks[_id].completed;
+    }
+
+    function deleteTodo(uint _id) public {
+      tasks[_id].deleted = true;
     }
 
     constructor() public {
