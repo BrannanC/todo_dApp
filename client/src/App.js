@@ -10,7 +10,8 @@ class App extends Component {
     web3: null,
     accounts: null,
     contract: null,
-    isLoading: false
+    isLoading: false,
+    newTodo: ""
   };
 
   componentDidMount = async () => {
@@ -49,13 +50,15 @@ class App extends Component {
     const tasks = await Promise.all(promises);
     console.log(tasks);
     // Update state with the result.
-    this.setState({ tasks, isLoading: false });
+    this.setState({ tasks, isLoading: false, newTodo: "" });
   };
 
   createTodo = async e => {
     e.preventDefault();
+    const text = this.state.newTodo || "New todo";
+    this.setState({ newTodo: "" });
     await this.state.contract.methods
-      .createTask("New Todo")
+      .createTask(text)
       .send({ from: this.state.accounts[0] }, () => this.getTodos());
   };
 
@@ -73,13 +76,27 @@ class App extends Component {
       .send({ from: this.state.accounts[0] }, () => this.getTodos());
   };
 
+  handleChange = e => {
+    const { name, value } = e.target;
+    this.setState({ [name]: value });
+  };
+
   render() {
     if (!this.state.web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
     return (
       <div className="App">
-        <button onClick={this.createTodo}>Create Todo</button>
+        <form onSubmit={this.createTodo}>
+          <input
+            name="newTodo"
+            type="text"
+            onChange={this.handleChange}
+            value={this.state.newTodo}
+          />
+          <button type="submit">Create Todo</button>
+        </form>
+
         <h1>ToDapp List!</h1>
         {this.state.tasks.map(task => (
           <div key={task[0]}>
@@ -89,9 +106,7 @@ class App extends Component {
             <button onClick={e => this.toggleComplete(e, task[0])}>
               Complete
             </button>
-            <button onClick={e => this.deleteTodo(e, task[0])}>
-              Delete
-            </button>
+            <button onClick={e => this.deleteTodo(e, task[0])}>Delete</button>
           </div>
         ))}
       </div>
